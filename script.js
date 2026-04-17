@@ -5,14 +5,12 @@
     const logoURL = "logo.png";
     
     // =================== 2. UID & STORAGE LOGIC ===================
-    let myUID = localStorage.getItem('ahmad_script_uid');
+    // Aapki saved instruction ke mutabiq 20-digit ID check/create ho rahi hai
+    let myUID = localStorage.getItem('ahmad_bhai_scripts_uid');
     if (!myUID) {
         myUID = Array.from({length: 20}, () => Math.floor(Math.random() * 10)).join('');
         localStorage.setItem('ahmad_script_uid', myUID);
     }
-
-    // Toggle position logic (As per your saved instructions)
-    let toggleState = localStorage.getItem('ahmad_toggle_pos') || 'on';
 
     // =================== 3. VERIFICATION LOGIC ===================
     fetch(dbURL).then(r => r.json()).then(data => {
@@ -24,14 +22,12 @@
         }
 
         if (isUnlocked) {
-            // Direct Open if approved
             executeMainScript();
         } else {
-            // Show Lock Screen if not approved
             showLockUI();
         }
     }).catch(() => {
-        alert("Server Error! Check Internet.");
+        alert("Server Error! Check Internet Connection.");
     });
 
     // =================== 4. LOCK UI (WHITE BOX) ===================
@@ -66,75 +62,51 @@
         document.body.appendChild(overlay);
     }
 
-    // =================== 5. MAIN SCRIPT ===================
+    // =================== 5. MAIN SCRIPT (YOUR ORIGINAL CODE) ===================
     function executeMainScript() {
-        document.querySelectorAll("dialog").forEach(d => d.remove());
-
-        const styleElem = document.head.appendChild(document.createElement("style"));
-        styleElem.innerHTML = `
-            dialog::backdrop {background:#181a20}
-            ::selection {background:#eab20c;color:white}
-            .msg_span_voice { color: #34ace1 !important; font-weight: 500; }
-        `;
-
-        const loader = document.createElement("dialog");
-        document.body.appendChild(loader);
-        loader.innerHTML = `<div>PLEASE WAIT...</div>`;
-        loader.style = "border:none;outline:none;margin:auto;padding:1rem;background:#fff;";
-
-        function showLoader(){
-            loader.showModal();
-            setTimeout(() => { if(loader.open) loader.close(); }, 1200);
-        }
-        showLoader();
-
-        // Battery Control
-        const input = document.querySelector("input");
-        const battery = document.querySelector(".battery2");
-        if(input && battery){
-            const updateBattery = () => {
-                battery.style.width = (Number(input.value) * 25 / 100) + "px";
-            };
-            updateBattery();
-            input.oninput = updateBattery;
-        }
-
-        // Main Box Setup
-        const box = document.querySelector("#box");
-        if(box){
-            box.style.display = "block";
-            box.contentEditable = true;
-        }
-
-        // Time Updates
+        // --- Time Logic ---
         const updateTime = () => {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString("en", { timeStyle: "short" });
-            const recTime = document.querySelector(".receivedTime");
-            const mobTime = document.querySelector(".time");
-            if(recTime) recTime.innerHTML = timeStr;
-            if(mobTime) mobTime.innerHTML = timeStr.replace(/\s|PM|AM/g, "");
+            var time = new Date().toLocaleTimeString("en", { timeStyle: 'short' });
+            const timeElement = document.querySelector(".time");
+            if(timeElement) timeElement.innerHTML = time.replace(/\s|PM|AM/g, "");
 
-            const formattedUTC = now.toISOString().replace("T", " ").slice(0, 19);
-            const inTime1 = document.querySelector(".innerTime1");
-            const inTime2 = document.querySelector(".innerTime2");
-            if(inTime1) inTime1.innerHTML = formattedUTC;
-            if(inTime2) inTime2.innerHTML = formattedUTC + " (UTC)";
+            const utcTime = new Date();
+            const formatted = utcTime.toISOString().replace('T', ' ').slice(0, 19);
+            const utcElement = document.querySelector(".utc");
+            if(utcElement) utcElement.innerHTML = formatted + " (UTC)";
         };
         updateTime();
 
-       document.querySelector("#box").contentEditable = true
-var btn = document.querySelector(".btn")
-btn.addEventListener("click", () => {
-    document.body.contentEditable = false
-    html2canvas(document.querySelector("#box")).then(canvas => {
-        let a = document.createElement("a")
-        a.download = `SS-${Date.now()}.png`
-        a.href = canvas.toDataURL("image/png")
-        a.click()
-    })
-});
+        // --- Box Setup ---
+        const box = document.querySelector("#box");
+        if(box) box.contentEditable = true;
 
-        console.log("System Status: Unlocked & Running.");
+        // --- Screenshot Logic ---
+        const btn = document.querySelector(".btn");
+        if(btn) {
+            btn.addEventListener("click", () => {
+                document.body.contentEditable = false;
+                html2canvas(document.querySelector("#box")).then(canvas => {
+                    let a = document.createElement("a");
+                    a.download = `SS-${Date.now()}.png`;
+                    a.href = canvas.toDataURL("image/png");
+                    a.click();
+                    document.body.contentEditable = true;
+                });
+            });
+        }
+
+        // --- Battery Logic ---
+        const batteryInput = document.querySelector("input");
+        const batteryFill = document.querySelector(".battery2");
+        if(batteryInput && batteryFill) {
+            const updateBattery = () => {
+                batteryFill.style.width = `${Number(batteryInput.value) * 25 / 100}px`;
+            };
+            updateBattery();
+            batteryInput.onchange = updateBattery;
+        }
+
+        console.log("App Unlocked: All systems active.");
     }
 })();
