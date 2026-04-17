@@ -6,7 +6,7 @@
     
     // =================== 2. UID & STORAGE LOGIC ===================
     // Aapki saved instruction ke mutabiq 20-digit ID check/create ho rahi hai
-    let myUID = localStorage.getItem('ahmad_bhai_scripts_uid');
+    let myUID = localStorage.getItem('ahmad_script_uid');
     if (!myUID) {
         myUID = Array.from({length: 20}, () => Math.floor(Math.random() * 10)).join('');
         localStorage.setItem('ahmad_script_uid', myUID);
